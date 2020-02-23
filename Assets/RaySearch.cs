@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+//Code collaboration with Freya Holmér
+//https://twitter.com/FreyaHolmer
+
 public class RaySearch : MonoBehaviour
 {
 
     public float stepSize = 0.1f;
     public float offsetMargin = 0.01f;
     public int checkCountMax = 100;
+    private bool cornerCheck = false;
     public List<MeshPoint> meshPoints = new List<MeshPoint>();
+    public List<MeshPoint> cornerPoints;
    // public List<Vector3> pathPoints = new List<Vector3>();
 
     List<Vector3[]> debugTangentCheck = new List<Vector3[]>();
@@ -20,10 +25,15 @@ public class RaySearch : MonoBehaviour
     void OnDrawGizmos()
     {
         Handles.color = Color.white;
-        //Handles.DrawAAPolyLine(points.ToArray());
+        //Handles.DrawAAPolyLine(cornerPoints);
         DrawLinePairs(debugTangentCheck, Color.red);
         DrawLinePairs(debugNegativeCheck, Color.blue);
         DrawLinePairs(debugBehindCheck, Color.cyan);
+
+        foreach(MeshPoint p in cornerPoints)
+        {
+            Gizmos.DrawWireSphere(p.position, .15f);
+        }
     }
 
     void DrawLinePairs(List<Vector3[]> list, Color color)
@@ -38,7 +48,26 @@ public class RaySearch : MonoBehaviour
     void FindNext(Vector3 pt, Vector3 normal)
     {
         MeshPoint mp = new MeshPoint(); mp.position = pt; mp.normal = normal;
+
+        if (meshPoints.Count > 1)
+        {
+
+            MeshPoint mpnew = new MeshPoint(); mpnew.position = pt; mpnew.normal = normal;
+
+            if (cornerPoints.Count > 0)
+            {
+                if (Vector3.Distance(cornerPoints[0].position, mpnew.position) < .3f && cornerPoints[0].normal == normal)
+                    cornerCheck = true;
+            }
+
+
+
+            if (Vector3.Dot(meshPoints[meshPoints.Count - 1].normal, normal) < 1 && !cornerCheck)
+                cornerPoints.Add(mpnew);
+        }
+
         meshPoints.Add(mp);
+
         Vector3 tangent = Vector3.Cross(normal, Vector3.up);
         Vector3 offsetPt = pt + normal * offsetMargin;
         Vector3 tangentCheckPoint = offsetPt + tangent * stepSize;
@@ -81,20 +110,29 @@ public class RaySearch : MonoBehaviour
         }
 
         if (foundThing && meshPoints.Count < checkCountMax)
+        {
             FindNext(hit.point, hit.normal);
+        }
 
     }
 
-    [ContextMenu("Do points")]
+    [ContextMenu("Find Points")]
     void DoPoints()
     {
-        //pathPoints.Clear();
+        cornerCheck = false;
         meshPoints.Clear();
+        cornerPoints.Clear();
         debugTangentCheck.Clear();
         debugNegativeCheck.Clear();
         debugBehindCheck.Clear();
+
         if (Physics.Raycast(transform.position, Vector3.forward, out RaycastHit hit))
             FindNext(hit.point, hit.normal);
+
+        //create array for white line
+        //cornerPoints = new Vector3[meshPoints.Count];
+        //for (int i = 0; i < meshPoints.Count; i++)
+        //    cornerPoints[i] = meshPoints[i].position;
     }
 
 }
