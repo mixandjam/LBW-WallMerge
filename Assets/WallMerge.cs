@@ -9,7 +9,15 @@ public class WallMerge : MonoBehaviour
     private Vector3 previousCorner;
     private Vector3 chosenCorner;
 
+    public MoveTest decalMovement;
+
     public float lerp;
+
+    [Space]
+
+    [Header("Cameras")]
+    public GameObject gameCam;
+    public GameObject wallCam;
 
     void Update()
     {
@@ -32,18 +40,19 @@ public class WallMerge : MonoBehaviour
                     nextCorner = (index < search.cornerPoints.Count - 1) ? search.cornerPoints[index + 1].position : search.cornerPoints[0].position;
                     previousCorner = (index > 0) ? search.cornerPoints[index - 1].position : search.cornerPoints[search.cornerPoints.Count - 1].position;
 
-                    print("<color=yellow><b>NEXT CORNER: </b></color>" + (hit.point - nextCorner).normalized);
-                    print("<color=blue><b>PREVIOUS CORNER: </b></color>" + (hit.point - previousCorner).normalized);
-
-                    chosenCorner =
-                        (Mathf.Min((hit.point - nextCorner).magnitude, (hit.point - previousCorner).magnitude) == (hit.point - previousCorner).magnitude ? previousCorner : nextCorner);
+                    chosenCorner = Vector3.Dot((closestCorner - hit.point), (nextCorner - hit.point)) > 0 ? previousCorner : nextCorner;
 
                     float distance = Vector3.Distance(closestCorner, chosenCorner);
                     float playerDis = Vector3.Distance(chosenCorner, hit.point);
 
                     lerp = Mathf.Abs(distance - playerDis) / ((distance + playerDis) / 2);
 
-                    FindObjectOfType<MoveTest>().transform.position = Vector3.Lerp(closestCorner, chosenCorner, lerp);
+                    decalMovement.SetPosition(closestCorner, chosenCorner, lerp, search);
+
+                    wallCam.SetActive(true);
+                    gameCam.SetActive(false);
+
+                    gameObject.SetActive(false);
                 }
             }
         }
