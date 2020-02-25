@@ -60,8 +60,6 @@ public class RaySearch : MonoBehaviour
                     cornerCheck = true;
             }
 
-
-
             if (Vector3.Dot(meshPoints[meshPoints.Count - 1].normal, normal) < 1 && !cornerCheck)
                 cornerPoints.Add(mpnew);
         }
