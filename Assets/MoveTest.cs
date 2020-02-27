@@ -40,14 +40,16 @@ public class MoveTest : MonoBehaviour
             if(movementLerp >= distanceToTurn)
             {
                 active = false;
-                print("stopR");
+
                 i1 = search.cornerPoints.FindIndex(x => x.position == p2);
                 i2 = (i1 == search.cornerPoints.Count - 1) ? 0 : i1 + 1;
                 rotation = true;
                 //position the pivot
                 pivot.forward = transform.forward;
                 pivot.position = transform.position;
-                pivot.localPosition += new Vector3(0, 0, Vector3.Dot(transform.forward, (search.cornerPoints[i2].normal)));
+
+                pivot.localPosition += -pivot.forward;
+
                 //make pivot parent
                 transform.parent = pivot;
                 //set rotation lerp to 0
@@ -55,8 +57,6 @@ public class MoveTest : MonoBehaviour
                 rotationLerp = 0;
                 //save normal
                 savedNormal = transform.forward;
-
-                print(Vector3.Angle((search.cornerPoints[i1].normal), (search.cornerPoints[i2].normal)));
 
             }
             else if(movementLerp <= 0)
