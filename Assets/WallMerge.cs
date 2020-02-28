@@ -40,6 +40,7 @@ public class WallMerge : MonoBehaviour
                     nextCorner = (index < search.cornerPoints.Count - 1) ? search.cornerPoints[index + 1].position : search.cornerPoints[0].position;
                     previousCorner = (index > 0) ? search.cornerPoints[index - 1].position : search.cornerPoints[search.cornerPoints.Count - 1].position;
 
+                    bool nextCornerIsRight = Vector3.Dot((closestCorner - hit.point), (nextCorner - hit.point)) > 0 ? true : false;
                     chosenCorner = Vector3.Dot((closestCorner - hit.point), (nextCorner - hit.point)) > 0 ? previousCorner : nextCorner;
 
                     float distance = Vector3.Distance(closestCorner, chosenCorner);
@@ -47,7 +48,7 @@ public class WallMerge : MonoBehaviour
 
                     lerp = Mathf.Abs(distance - playerDis) / ((distance + playerDis) / 2);
 
-                    decalMovement.SetPosition(closestCorner, chosenCorner, lerp, search);
+                    decalMovement.SetPosition(closestCorner, chosenCorner, lerp, search, nextCornerIsRight, hit.normal);
 
                     wallCam.SetActive(true);
                     gameCam.SetActive(false);
