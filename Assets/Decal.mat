@@ -163,7 +163,7 @@ Material:
     - _DstBlend: 0
     - _Emissive: 1
     - _EmissiveColorMode: 1
-    - _EmissiveExposureWeight: 0.956
+    - _EmissiveExposureWeight: 0.254
     - _EmissiveIntensity: 900
     - _EmissiveIntensityUnit: 0
     - _EnableBlendModePreserveSpecularLighting: 1

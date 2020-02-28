@@ -14,12 +14,11 @@ public class MoveTest : MonoBehaviour
     public bool rotation;
     public bool isGoingRight;
 
-    public float movementLerp;
     public float rotationLerp;
 
     public Vector3 p1;
     public Vector3 p2;
-    public int i1, i2,i3;
+    public int i1, i2,i3,i0;
     public RaySearch search;
     public Transform pivot;
     public Transform lineRef1, lineRef2;
@@ -28,14 +27,13 @@ public class MoveTest : MonoBehaviour
 
     private float distanceToTurn = 1f;
 
-    public void SetPosition(Vector3 c1, Vector3 c2, float lerp, RaySearch ray, bool nextCornerIsRight, Vector3 normal)
+    public void SetPosition(Vector3 pos1, Vector3 pos2, float lerp, RaySearch ray, bool nextCornerIsRight, Vector3 normal)
     {
         transform.forward = normal;
-        transform.position = Vector3.Lerp(c1, c2, lerp);
+        transform.position = Vector3.Lerp(pos1, pos2, lerp);
         search = ray;
-        p1 = nextCornerIsRight ? c2 : c1;
-        p2 = nextCornerIsRight ? c1 : c2;
-        movementLerp = lerp;
+        p1 = nextCornerIsRight ? pos2 : pos1;
+        p2 = nextCornerIsRight ? pos1 : pos2;
         active = true;
     }
 
@@ -52,7 +50,7 @@ public class MoveTest : MonoBehaviour
         if (active)
         {
 
-            transform.position = Vector3.MoveTowards(transform.position, axis > 0 ? p2 : p1, Mathf.Abs(axis) * Time.deltaTime * movSpeed);
+            transform.position = Vector3.MoveTowards(transform.position, p2, axis * Time.deltaTime * movSpeed);
 
             if(Vector3.Distance(transform.position, p1) > (Vector3.Distance(p1,p2) - distanceToTurn))
             {
@@ -60,6 +58,7 @@ public class MoveTest : MonoBehaviour
             }
             else if(Vector3.Distance(transform.position, p1) < distanceToTurn)
             {
+                print("left");
                 StartRotation(false);
             }
 
@@ -67,17 +66,24 @@ public class MoveTest : MonoBehaviour
 
         if (rotation)
         {
-            rotationLerp = Mathf.Clamp(rotationLerp + (axis * Time.deltaTime * rotSpeed), 0, 1);
-            pivot.forward = Vector3.Lerp(savedNormal, search.cornerPoints[isGoingRight ? i1 : i3].normal, rotationLerp);
+            float n = isGoingRight ? 1 : -1;
+            Vector3 normal = isGoingRight ? search.cornerPoints[i1].normal : search.cornerPoints[i3].normal;
+
+            rotationLerp = Mathf.Clamp(rotationLerp + ((axis*n) * Time.deltaTime * rotSpeed), 0, 1);
+            pivot.forward = Vector3.Lerp(savedNormal, normal, rotationLerp);
 
             if (rotationLerp >= 1 || rotationLerp <= 0)
             {
-                p1 = search.cornerPoints[i1].position;
-                p2 = search.cornerPoints[i2].position;
-                rotationLerp = .01f;
+                bool complete = (rotationLerp >= 1) ? true : false;
+
+
+                p1 = complete ? search.cornerPoints[complete ? i1 : i0].position : p1;
+                p2 = complete ? search.cornerPoints[complete ? i2 : i1].position : p2;
+
                 transform.parent = null;
                 rotation = false;
                 active = true;
+                rotationLerp = .01f;
             }
         }
     }
@@ -90,6 +96,7 @@ public class MoveTest : MonoBehaviour
         savedNormal = transform.forward;
 
         i1 = search.cornerPoints.FindIndex(x => x.position == p2);
+        i0 = right ? 0 : ((i1 == 0) ? search.cornerPoints.Count - 1 : i1 - 1);
         i2 = right ? ((i1 == search.cornerPoints.Count - 1) ? 0 : i1 + 1) : ((i1 == 0) ? search.cornerPoints.Count-1 : i1 - 1);
         i3 = right ? 0 : ((i2 == 0) ? search.cornerPoints.Count - 1 : i2 - 1); 
 
@@ -140,5 +147,13 @@ public class MoveTest : MonoBehaviour
             intersection = Vector3.zero;
             return false;
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.black;
+        Gizmos.DrawSphere(p1, .2f);
+        Gizmos.DrawSphere(p2, .2f);
+
     }
 }
