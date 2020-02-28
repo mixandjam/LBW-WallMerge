@@ -9,114 +9,140 @@ public class MoveTest : MonoBehaviour
     [Header("Movement Parameters")]
     public float movSpeed = 3;
     public float rotSpeed = 2;
-
-    public bool active;
-    public bool rotation;
-    public bool isGoingRight;
-
     public float rotationLerp;
+    public float distanceToTurn = 1f;
 
-    public Vector3 p1;
-    public Vector3 p2;
-    public int i1, i2,i3,i0;
+    [Space]
+
+    [Header("Booleans")]
+    public bool isMoving;
+    public bool isRotating;
+    public bool isGoingRight;
+    public bool isNextCornerRight;
+
+    public Vector3 originPos;
+    public Vector3 targetPos;
+    public Vector3 debug;
+
+    private int currentIndex, previousIndex, nextIndex, extraIndex;
+
     public RaySearch search;
     public Transform pivot;
     public Transform lineRef1, lineRef2;
 
     private Vector3 savedNormal;
 
-    private float distanceToTurn = 1f;
-
-    public void SetPosition(Vector3 pos1, Vector3 pos2, float lerp, RaySearch ray, bool nextCornerIsRight, Vector3 normal)
+    public void SetPosition(Vector3 orig, Vector3 target, float lerp, RaySearch ray, bool nextCornerIsRight, Vector3 normal)
     {
         transform.forward = normal;
-        transform.position = Vector3.Lerp(pos1, pos2, lerp);
+        transform.position = Vector3.Lerp(orig, target, lerp);
         search = ray;
-        p1 = nextCornerIsRight ? pos2 : pos1;
-        p2 = nextCornerIsRight ? pos1 : pos2;
-        active = true;
+        originPos = orig;
+        targetPos = target;
+        isMoving = true;
+        isNextCornerRight = nextCornerIsRight;
+    }
+
+    void Debug()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
+            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
     }
 
     private void Update()
     {
-
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
-        }
+        Debug();
 
         float axis = Input.GetAxis("Horizontal");
 
-        if (active)
+        if (isMoving && !isRotating)
         {
+            //move player between the two corner points
+            transform.position = Vector3.MoveTowards(transform.position, isNextCornerRight ? targetPos : originPos, axis * Time.deltaTime * movSpeed);
 
-            transform.position = Vector3.MoveTowards(transform.position, p2, axis * Time.deltaTime * movSpeed);
-
-            if(Vector3.Distance(transform.position, p1) > (Vector3.Distance(p1,p2) - distanceToTurn))
+            if(Vector3.Distance(transform.position, originPos) > (Vector3.Distance(originPos,targetPos) - distanceToTurn))
             {
                 StartRotation(true);
             }
-            else if(Vector3.Distance(transform.position, p1) < distanceToTurn)
+            else if(Vector3.Distance(transform.position, originPos) < distanceToTurn)
             {
-                print("left");
                 StartRotation(false);
             }
 
         }
 
-        if (rotation)
+        if (isRotating && !isMoving)
         {
-            float n = isGoingRight ? 1 : -1;
-            Vector3 normal = isGoingRight ? search.cornerPoints[i1].normal : search.cornerPoints[i3].normal;
-
-            rotationLerp = Mathf.Clamp(rotationLerp + ((axis*n) * Time.deltaTime * rotSpeed), 0, 1);
-            pivot.forward = Vector3.Lerp(savedNormal, normal, rotationLerp);
-
-            if (rotationLerp >= 1 || rotationLerp <= 0)
-            {
-                bool complete = (rotationLerp >= 1) ? true : false;
-
-
-                p1 = complete ? search.cornerPoints[complete ? i1 : i0].position : p1;
-                p2 = complete ? search.cornerPoints[complete ? i2 : i1].position : p2;
-
-                transform.parent = null;
-                rotation = false;
-                active = true;
-                rotationLerp = .01f;
-            }
+            CornerRoration(axis);
         }
     }
 
     public void StartRotation(bool right)
     {
         isGoingRight = right;
-        active = false;
-
+        isMoving = false;
         savedNormal = transform.forward;
 
-        i1 = search.cornerPoints.FindIndex(x => x.position == p2);
-        i0 = right ? 0 : ((i1 == 0) ? search.cornerPoints.Count - 1 : i1 - 1);
-        i2 = right ? ((i1 == search.cornerPoints.Count - 1) ? 0 : i1 + 1) : ((i1 == 0) ? search.cornerPoints.Count-1 : i1 - 1);
-        i3 = right ? 0 : ((i2 == 0) ? search.cornerPoints.Count - 1 : i2 - 1); 
+        currentIndex = search.cornerPoints.FindIndex(x => x.position == targetPos);
+
+        previousIndex = currentIndex + (right ? -1 : 1);
+        if (previousIndex > search.cornerPoints.Count)
+            previousIndex = 0;
+        if (previousIndex < 0)
+            previousIndex = search.cornerPoints.Count-1;
+
+        nextIndex = currentIndex + (right ? 1 : -1);
+        if (nextIndex > search.cornerPoints.Count)
+            nextIndex = 0;
+        if (nextIndex < 0)
+            nextIndex = search.cornerPoints.Count-1;
+
+        extraIndex = nextIndex + (right ? 1 : -1);
+        if (extraIndex > search.cornerPoints.Count)
+            extraIndex = 0;
+        if (extraIndex < 0)
+            extraIndex = search.cornerPoints.Count - 1;
 
         pivot.position = GetPivotPosition(right);
         transform.parent = pivot;
         rotationLerp = .01f;
-        rotation = true;
+        isRotating = true;
+    }
+
+    public void CornerRoration(float axis)
+    {
+        float n = isGoingRight ? 1 : -1;
+        Vector3 normal = isGoingRight ? search.cornerPoints[currentIndex].normal : search.cornerPoints[extraIndex].normal;
+
+        rotationLerp = Mathf.Clamp(rotationLerp + ((axis * n) * Time.deltaTime * rotSpeed), 0, 1);
+        pivot.forward = Vector3.Lerp(savedNormal, normal, rotationLerp);
+
+        if (rotationLerp >= 1 || rotationLerp <= 0)
+        {
+            bool complete = (rotationLerp >= 1) ? true : false;
+            print(complete);
+
+            originPos = complete ? search.cornerPoints[complete ? currentIndex : previousIndex].position : originPos;
+            targetPos = complete ? search.cornerPoints[complete ? nextIndex : currentIndex].position : targetPos;
+
+            transform.parent = null;
+            isRotating = false;
+            isMoving = true;
+            rotationLerp = .01f;
+        }
     }
 
     public Vector3 GetPivotPosition(bool right)
     {
-        lineRef1.position = right ? p2 : p1;
-        lineRef1.LookAt(right ? p1 : p2);
+        lineRef1.position = right ? targetPos : originPos;
+        lineRef1.LookAt(right ? originPos : targetPos);
         lineRef1.localPosition += lineRef1.forward * distanceToTurn;
         lineRef1.forward = savedNormal;
 
-        lineRef2.position = right ? p2 : p1;
-        lineRef2.LookAt(search.cornerPoints[right ? i2 : i3].position);
+        lineRef2.position = right ? targetPos : originPos;
+        lineRef2.LookAt(search.cornerPoints[nextIndex].position);
         lineRef2.localPosition += lineRef2.forward * distanceToTurn;
-        lineRef2.forward = search.cornerPoints[right ? i1 : i3].normal;
+        lineRef2.forward = search.cornerPoints[right ? currentIndex : extraIndex].normal;
 
         pivot.forward = savedNormal;
 
@@ -152,8 +178,9 @@ public class MoveTest : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.black;
-        Gizmos.DrawSphere(p1, .2f);
-        Gizmos.DrawSphere(p2, .2f);
-
+        Gizmos.DrawSphere(originPos, .5f);
+        Gizmos.DrawSphere(targetPos, .5f);
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(debug, .5f);
     }
 }

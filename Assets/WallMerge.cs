@@ -9,9 +9,9 @@ public class WallMerge : MonoBehaviour
     private Vector3 previousCorner;
     private Vector3 chosenCorner;
 
+    [Header("Public References")]
     public MoveTest decalMovement;
-
-    public float lerp;
+    private float positionLerp;
 
     [Space]
 
@@ -27,32 +27,42 @@ public class WallMerge : MonoBehaviour
             {
                 if(hit.transform.GetComponentInChildren<RaySearch>() != null)
                 {
+                    //store raycasted object's RaySearch component
                     RaySearch search = hit.transform.GetComponentInChildren<RaySearch>();
-                    List<Vector3> cornerPoints = new List<Vector3>();
-                    foreach (MeshPoint mp in search.cornerPoints)
-                    {
-                        cornerPoints.Add(mp.position);
-                    }
 
+                    //create a new list of all the corner positions
+                    List<Vector3> cornerPoints = new List<Vector3>();
+
+                    for (int i = 0; i < search.cornerPoints.Count; i++)
+                        cornerPoints.Add(search.cornerPoints[i].position);
+
+                    //find the closest corner position and index
                     closestCorner = GetClosestPoint(cornerPoints.ToArray(), hit.point);
                     int index = search.cornerPoints.FindIndex(x => x.position == closestCorner);
 
+                    //determine the adjacent corners
                     nextCorner = (index < search.cornerPoints.Count - 1) ? search.cornerPoints[index + 1].position : search.cornerPoints[0].position;
                     previousCorner = (index > 0) ? search.cornerPoints[index - 1].position : search.cornerPoints[search.cornerPoints.Count - 1].position;
 
-                    bool nextCornerIsRight = Vector3.Dot((closestCorner - hit.point), (nextCorner - hit.point)) > 0 ? true : false;
+                    //choose a corner to be the target
                     chosenCorner = Vector3.Dot((closestCorner - hit.point), (nextCorner - hit.point)) > 0 ? previousCorner : nextCorner;
+                    bool nextCornerIsRight = isRightSide(closestCorner, chosenCorner, Vector3.up);
 
+                    print("<b>next corner is right:</b> " + nextCornerIsRight);
+                    print("<b>index:</b> " + index);
+                    print("<b>chosen index :</b> " + search.cornerPoints.FindIndex(x => x.position == chosenCorner));
+
+                    //find the distance from the origin point and find it's normalized position in the distance of the origin and target
                     float distance = Vector3.Distance(closestCorner, chosenCorner);
                     float playerDis = Vector3.Distance(chosenCorner, hit.point);
+                    positionLerp = Mathf.Abs(distance - playerDis) / ((distance + playerDis) / 2);
 
-                    lerp = Mathf.Abs(distance - playerDis) / ((distance + playerDis) / 2);
+                    //start the MovementScript
+                    decalMovement.SetPosition(closestCorner, chosenCorner, positionLerp, search, nextCornerIsRight, hit.normal);
 
-                    decalMovement.SetPosition(closestCorner, chosenCorner, lerp, search, nextCornerIsRight, hit.normal);
-
+                    //transition logic
                     wallCam.SetActive(true);
                     gameCam.SetActive(false);
-
                     gameObject.SetActive(false);
                 }
             }
@@ -87,8 +97,13 @@ public class WallMerge : MonoBehaviour
 
     }
 
-    public float Remap(float value, float from1, float to1, float from2, float to2)
+    //https://forum.unity.com/threads/left-right-test-function.31420/
+
+    public bool isRightSide(Vector3 fwd, Vector3 targetDir, Vector3 up)
     {
-        return (value - from1) / (to1 - from1) * (to2 - from2) + from2;
+        Vector3 right = Vector3.Cross(up, fwd);        // right vector
+        float dir = Vector3.Dot(right, targetDir);
+        return dir > 0f;
     }
+
 }
