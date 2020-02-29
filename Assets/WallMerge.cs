@@ -10,7 +10,7 @@ public class WallMerge : MonoBehaviour
     private Vector3 chosenCorner;
 
     [Header("Public References")]
-    public MoveTest decalMovement;
+    public ProjectorMovement decalMovement;
     private float positionLerp;
 
     [Space]
@@ -46,11 +46,7 @@ public class WallMerge : MonoBehaviour
 
                     //choose a corner to be the target
                     chosenCorner = Vector3.Dot((closestCorner - hit.point), (nextCorner - hit.point)) > 0 ? previousCorner : nextCorner;
-                    bool nextCornerIsRight = isRightSide(closestCorner, chosenCorner, Vector3.up);
-
-                    print("<b>next corner is right:</b> " + nextCornerIsRight);
-                    print("<b>index:</b> " + index);
-                    print("<b>chosen index :</b> " + search.cornerPoints.FindIndex(x => x.position == chosenCorner));
+                    bool nextCornerIsRight = isRightSide(-hit.normal, chosenCorner - closestCorner, Vector3.up);
 
                     //find the distance from the origin point and find it's normalized position in the distance of the origin and target
                     float distance = Vector3.Distance(closestCorner, chosenCorner);
@@ -101,9 +97,11 @@ public class WallMerge : MonoBehaviour
 
     public bool isRightSide(Vector3 fwd, Vector3 targetDir, Vector3 up)
     {
-        Vector3 right = Vector3.Cross(up, fwd);        // right vector
-        float dir = Vector3.Dot(right, targetDir);
+        Vector3 right = Vector3.Cross(up.normalized, fwd.normalized);        // right vector
+        float dir = Vector3.Dot(right, targetDir.normalized);
         return dir > 0f;
     }
+
+
 
 }
