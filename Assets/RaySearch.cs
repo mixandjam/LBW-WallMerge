@@ -30,6 +30,9 @@ public class RaySearch : MonoBehaviour
         DrawLinePairs(debugNegativeCheck, Color.blue);
         DrawLinePairs(debugBehindCheck, Color.cyan);
 
+        if (cornerPoints == null)
+            return;
+
         foreach(MeshPoint p in cornerPoints)
         {
             Gizmos.DrawWireSphere(p.position, .15f);
@@ -60,7 +63,9 @@ public class RaySearch : MonoBehaviour
                     cornerCheck = true;
             }
 
-            if (Vector3.Dot(meshPoints[meshPoints.Count - 1].normal, normal) < 1 && !cornerCheck)
+            print(Vector3.Dot(meshPoints[meshPoints.Count - 1].normal, normal));
+
+            if (Vector3.Dot(meshPoints[meshPoints.Count - 1].normal, normal) < .98f && !cornerCheck)
                 cornerPoints.Add(mpnew);
         }
 

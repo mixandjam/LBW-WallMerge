@@ -98,11 +98,12 @@ public class ProjectorMovement : MonoBehaviour
 
         currentIndex = search.cornerPoints.FindIndex(x => x.position == (right ? targetPos : originPos));
 
-        rotationLerp = .01f;
 
         pivot.position = GetPivotPosition(currentIndex, right);
         pivot.forward = transform.forward;
         transform.parent = pivot;
+
+        rotationLerp = .01f;
 
         isRotating = true;
     }

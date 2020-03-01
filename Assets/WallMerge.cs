@@ -23,8 +23,9 @@ public class WallMerge : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 1))
+            if (Physics.Raycast(transform.position + (Vector3.up * .1f), transform.forward, out RaycastHit hit, 1))
             {
+                print(hit.transform);
                 if(hit.transform.GetComponentInChildren<RaySearch>() != null)
                 {
                     //store raycasted object's RaySearch component
@@ -84,7 +85,7 @@ public class WallMerge : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.black;
-        Gizmos.DrawRay(transform.position, transform.forward);
+        Gizmos.DrawRay(transform.position + (Vector3.up*.1f), transform.forward);
         Gizmos.DrawSphere(closestCorner, .2f);
         Gizmos.color = Color.blue;
         Gizmos.DrawSphere(previousCorner, .2f);
