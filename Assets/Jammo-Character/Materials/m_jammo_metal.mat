@@ -27,7 +27,8 @@ Material:
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 2000
-  stringTagMap: {}
+  stringTagMap:
+    MotionVector: User
   disabledShaderPasses:
   - DistortionVectors
   - MOTIONVECTORS
@@ -37,6 +38,34 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - Texture2D_24BA10F6:
+        m_Texture: {fileID: 2800000, guid: f6c18262b3c0eba4bb830f3d91682a4f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_2AC673EA:
+        m_Texture: {fileID: 2800000, guid: 3a5a871d579c2da4094f823d674595eb, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_55334EAF:
+        m_Texture: {fileID: 2800000, guid: f6c18262b3c0eba4bb830f3d91682a4f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_6EFF7247:
+        m_Texture: {fileID: 2800000, guid: fb6e06c953f0d8045bc58e0f5a640f07, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_8C13316C:
+        m_Texture: {fileID: 2800000, guid: fb6e06c953f0d8045bc58e0f5a640f07, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_BC1ED769:
+        m_Texture: {fileID: 2800000, guid: 6a0fb4aa4de843c45a776e5a4ac9dd69, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_C06ED1BA:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _AnisotropyMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -154,6 +183,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
+    - Vector1_29EBB589: 1
+    - Vector1_5AD5258: 0
+    - Vector1_94ACE4A8: 0
+    - Vector1_E55C9F5F: 1
     - _AORemapMax: 1
     - _AORemapMin: 0
     - _ATDistance: 1
@@ -285,6 +318,10 @@ Material:
     - _ZTestTransparent: 4
     - _ZWrite: 1
     m_Colors:
+    - Color_2689929D: {r: 0, g: 0, b: 0, a: 0}
+    - Color_D56BDDD3: {r: 1, g: 1, b: 1, a: 0}
+    - Vector2_BC0C3102: {r: 0, g: 0, b: 0, a: 0}
+    - Vector2_CC68A12A: {r: 1, g: 1, b: 0, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}

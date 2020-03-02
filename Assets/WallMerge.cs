@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
+using DG.Tweening;
+using Cinemachine;
 
 public class WallMerge : MonoBehaviour
 {
@@ -9,9 +12,13 @@ public class WallMerge : MonoBehaviour
     private Vector3 previousCorner;
     private Vector3 chosenCorner;
 
+    [Header("Parameters")]
+    public float transitionTime = .8f;
+
+    [Space]
+
     [Header("Public References")]
     public ProjectorMovement decalMovement;
-    private float positionLerp;
 
     [Space]
 
@@ -19,13 +26,24 @@ public class WallMerge : MonoBehaviour
     public GameObject gameCam;
     public GameObject wallCam;
 
+    [Space]
+
+    [Header("Post Processing")]
+    public Volume dofVolume;
+    public Volume zoomVolume;
+    CinemachineBrain brain;
+
+    private void Start()
+    {
+        brain = Camera.main.GetComponent<CinemachineBrain>();
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (Physics.Raycast(transform.position + (Vector3.up * .1f), transform.forward, out RaycastHit hit, 1))
             {
-                print(hit.transform);
                 if(hit.transform.GetComponentInChildren<RaySearch>() != null)
                 {
                     //store raycasted object's RaySearch component
@@ -49,22 +67,46 @@ public class WallMerge : MonoBehaviour
                     chosenCorner = Vector3.Dot((closestCorner - hit.point), (nextCorner - hit.point)) > 0 ? previousCorner : nextCorner;
                     bool nextCornerIsRight = isRightSide(-hit.normal, chosenCorner - closestCorner, Vector3.up);
 
-                    //find the distance from the origin point and find it's normalized position in the distance of the origin and target
+                    //find the distance from the origin point
                     float distance = Vector3.Distance(closestCorner, chosenCorner);
                     float playerDis = Vector3.Distance(chosenCorner, hit.point);
-                    positionLerp = Mathf.Abs(distance - playerDis) / ((distance + playerDis) / 2);
+
+                    //quick fix so that we don't allow the player to start in a corner;
+                    if (playerDis > (distance - decalMovement.distanceToTurn))
+                        playerDis = distance - decalMovement.distanceToTurn;
+                    if(playerDis < decalMovement.distanceToTurn)
+                        playerDis = decalMovement.distanceToTurn;
+
+                    //find it's normalized position in the distance of the origin and target
+                    float positionLerp = Mathf.Abs(distance - playerDis) / ((distance + playerDis) / 2);
 
                     //start the MovementScript
                     decalMovement.SetPosition(closestCorner, chosenCorner, positionLerp, search, nextCornerIsRight, hit.normal);
 
                     //transition logic
-                    wallCam.SetActive(true);
-                    gameCam.SetActive(false);
-                    gameObject.SetActive(false);
+                    Transition(true);
                 }
             }
         }
     }
+
+    public void Transition(bool state)
+    {
+        decalMovement.gameObject.SetActive(state);
+        wallCam.SetActive(state);
+        gameCam.SetActive(!state);
+        gameObject.SetActive(!state);
+
+        float transition = state ? transitionTime : .2f;
+        brain.m_DefaultBlend.m_Time = state ? transitionTime : .2f;
+
+        //Field of View
+        float dof = state ? 1 : 0;
+        DOVirtual.Float(dofVolume.weight, dof, transition, DofPostVolume);
+        if(state)
+        DOVirtual.Float(zoomVolume.weight, 1, .25f, ZoomVolume).OnComplete(()=> DOVirtual.Float(zoomVolume.weight, 0, .4f, ZoomVolume).SetDelay(.1f));
+    }
+
     Vector3 GetClosestPoint(Vector3[] points, Vector3 currentPoint)
     {
         Vector3 pMin = Vector3.zero;
@@ -95,7 +137,6 @@ public class WallMerge : MonoBehaviour
     }
 
     //https://forum.unity.com/threads/left-right-test-function.31420/
-
     public bool isRightSide(Vector3 fwd, Vector3 targetDir, Vector3 up)
     {
         Vector3 right = Vector3.Cross(up.normalized, fwd.normalized);        // right vector
@@ -103,6 +144,14 @@ public class WallMerge : MonoBehaviour
         return dir > 0f;
     }
 
+    public void DofPostVolume(float x)
+    {
+        dofVolume.weight = x;
+    }
 
+    public void ZoomVolume(float x)
+    {
+        zoomVolume.weight = x;
+    }
 
 }

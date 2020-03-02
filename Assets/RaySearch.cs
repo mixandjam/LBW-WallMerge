@@ -123,11 +123,15 @@ public class RaySearch : MonoBehaviour
     void DoPoints()
     {
         cornerCheck = false;
-        meshPoints.Clear();
-        cornerPoints.Clear();
-        debugTangentCheck.Clear();
-        debugNegativeCheck.Clear();
-        debugBehindCheck.Clear();
+
+        if (meshPoints != null)
+        {
+            meshPoints.Clear();
+            cornerPoints.Clear();
+            debugTangentCheck.Clear();
+            debugNegativeCheck.Clear();
+            debugBehindCheck.Clear();
+        }
 
         if (Physics.Raycast(transform.position, Vector3.forward, out RaycastHit hit))
             FindNext(hit.point, hit.normal);

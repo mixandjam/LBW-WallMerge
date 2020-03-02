@@ -59,15 +59,17 @@ public class ProjectorMovement : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && isActive)
         {
+            transform.parent = null;
+
             isActive = false;
             isMoving = false;
             isRotating = false;
+
+
             player.transform.position = new Vector3(transform.position.x, player.transform.position.y, transform.position.z);
             player.transform.forward = transform.forward;
             player.transform.position += (player.transform.forward * .5f);
-            player.gameObject.SetActive(true);
-            player.gameCam.SetActive(true);
-            player.wallCam.SetActive(false);
+            player.Transition(false);
         }
 
         float axis = Input.GetAxis("Horizontal");
