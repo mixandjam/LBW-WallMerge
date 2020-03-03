@@ -61,13 +61,13 @@ namespace UnityTemplateProjects
         public float positionLerpTime = 0.2f;
 
         [Header("Rotation Settings")]
-        [Tooltip("X = Change in mouse position.\nY = Multiplicative factor for camera isRotating.")]
+        [Tooltip("X = Change in mouse position.\nY = Multiplicative factor for camera rotationMode.")]
         public AnimationCurve mouseSensitivityCurve = new AnimationCurve(new Keyframe(0f, 0.5f, 0f, 5f), new Keyframe(1f, 2.5f, 0f, 0f));
 
-        [Tooltip("Time it takes to interpolate camera isRotating 99% of the way to the target."), Range(0.001f, 1f)]
+        [Tooltip("Time it takes to interpolate camera rotationMode 99% of the way to the target."), Range(0.001f, 1f)]
         public float rotationLerpTime = 0.01f;
 
-        [Tooltip("Whether or not to invert our Y axis for mouse input to isRotating.")]
+        [Tooltip("Whether or not to invert our Y axis for mouse input to rotationMode.")]
         public bool invertY = false;
 
         void OnEnable()

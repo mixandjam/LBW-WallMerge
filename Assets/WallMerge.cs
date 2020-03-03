@@ -7,6 +7,8 @@ using Cinemachine;
 
 public class WallMerge : MonoBehaviour
 {
+    private Animator playerAnimator;
+    private MovementInput playerMovement;
     private Vector3 closestCorner;
     private Vector3 nextCorner;
     private Vector3 previousCorner;
@@ -35,6 +37,8 @@ public class WallMerge : MonoBehaviour
 
     private void Start()
     {
+        playerAnimator = GetComponent<Animator>();
+        playerMovement = GetComponent<MovementInput>();
         brain = Camera.main.GetComponent<CinemachineBrain>();
     }
 
@@ -84,27 +88,41 @@ public class WallMerge : MonoBehaviour
                     decalMovement.SetPosition(closestCorner, chosenCorner, positionLerp, search, nextCornerIsRight, hit.normal);
 
                     //transition logic
-                    Transition(true);
+                    Transition(true, Vector3.Lerp(closestCorner, chosenCorner, positionLerp), hit.normal);
                 }
             }
         }
     }
 
-    public void Transition(bool state)
+    public void Transition(bool state, Vector3 point, Vector3 normal)
     {
-        decalMovement.gameObject.SetActive(state);
-        wallCam.SetActive(state);
-        gameCam.SetActive(!state);
-        gameObject.SetActive(!state);
 
-        float transition = state ? transitionTime : .2f;
-        brain.m_DefaultBlend.m_Time = state ? transitionTime : .2f;
+        transform.forward = -normal;
+
+        playerMovement.enabled = false;
+        playerAnimator.SetTrigger("turn");
+
+        Sequence s = DOTween.Sequence();
+        s.AppendInterval(.2f);
+        s.AppendCallback(() => gameCam.SetActive(!state));
+        s.AppendCallback(() => wallCam.SetActive(state));
+        s.Append(transform.GetChild(1).DOMove(point - new Vector3(0, .9f, 0), .7f).SetEase(Ease.InBack));
+        s.Join(transform.GetChild(1).DOScaleZ(.01f, .7f).SetDelay(.2f));
+        s.AppendCallback(() => decalMovement.gameObject.SetActive(state));
+        s.AppendCallback(() => decalMovement.GetComponentInChildren<ParticleSystem>().Play());
+        //decalMovement.gameObject.SetActive(state);
+        //wallCam.SetActive(state);
+        //gameCam.SetActive(!state);
+        //gameObject.SetActive(!state);
+
+        //float transition = state ? transitionTime : .2f;
+        //brain.m_DefaultBlend.m_Time = state ? transitionTime : .2f;
 
         //Field of View
-        float dof = state ? 1 : 0;
-        DOVirtual.Float(dofVolume.weight, dof, transition, DofPostVolume);
-        if(state)
-        DOVirtual.Float(zoomVolume.weight, 1, .25f, ZoomVolume).OnComplete(()=> DOVirtual.Float(zoomVolume.weight, 0, .4f, ZoomVolume).SetDelay(.1f));
+        //float dof = state ? 1 : 0;
+        //DOVirtual.Float(dofVolume.weight, dof, transition, DofPostVolume);
+        //if(state)
+        //DOVirtual.Float(zoomVolume.weight, 1, .25f, ZoomVolume).OnComplete(()=> DOVirtual.Float(zoomVolume.weight, 0, .4f, ZoomVolume).SetDelay(.1f));
     }
 
     Vector3 GetClosestPoint(Vector3[] points, Vector3 currentPoint)
