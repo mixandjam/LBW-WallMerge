@@ -21,6 +21,7 @@ public class ProjectorMovement : MonoBehaviour
     public bool rotationMode;
     public bool isGoingRight;
     public bool isMoving;
+    private bool activation;
 
     private Vector3 originPos;
     private Vector3 targetPos;
@@ -35,6 +36,8 @@ public class ProjectorMovement : MonoBehaviour
     private RaySearch search;
     public Transform pivot;
     public Transform lineRef1, lineRef2;
+    public ParticleSystem mergeParticle;
+    public ParticleSystem exitParticle;
 
     private Vector3 savedNormal;
 
@@ -51,7 +54,6 @@ public class ProjectorMovement : MonoBehaviour
         search = ray;
         originPos = nextCornerIsRight ? orig : target;
         targetPos = nextCornerIsRight ? target : orig;
-        isActive = true;
         movementMode = true;
     }
 
@@ -68,24 +70,31 @@ public class ProjectorMovement : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && isActive)
         {
             transform.parent = null;
-
             isActive = false;
             movementMode = false;
             rotationMode = false;
+            activation = false;
+            anim.speed = 1;
+            anim.SetFloat("axis", 0);
+            anim.SetTrigger("reset");
 
+            player.transform.position = new Vector3(transform.position.x, player.transform.position.y, transform.position.z) - (transform.forward * .5f);
 
-            player.transform.position = new Vector3(transform.position.x, player.transform.position.y, transform.position.z);
-            player.transform.forward = transform.forward;
-            player.transform.position += (player.transform.forward * .5f);
-            player.Transition(false,transform.position, transform.forward);
+            Vector3 playerFinalPos = player.transform.position + (transform.forward);
+
+            player.Transition(false,playerFinalPos, transform.forward);
         }
 
         float axis = Input.GetAxis("Horizontal");
 
-        if (movementMode && !rotationMode)
+        if (movementMode && !rotationMode && isActive)
         {
             //move player between the two corner points
             transform.position = Vector3.MoveTowards(transform.position, axis > 0 ? targetPos : originPos, Mathf.Abs(axis) * Time.deltaTime * movSpeed);
+
+            if (axis != 0 && !activation)
+                activation = true;
+
 
             if (Vector3.Distance(transform.position, originPos) > (Vector3.Distance(originPos, targetPos) - distanceToTurn) || Vector3.Distance(transform.position, originPos) < distanceToTurn)
             {
@@ -94,12 +103,20 @@ public class ProjectorMovement : MonoBehaviour
 
         }
 
-        if(rotationMode && !movementMode)
+        if(rotationMode && !movementMode && isActive)
         {
             CornerRoration(axis);
         }
 
+        if (!activation)
+            return;
+
         anim.SetFloat("axis", Input.GetAxisRaw("Horizontal"));
+
+        if (Input.GetAxis("Horizontal") == 0)
+            anim.speed = 0;
+        else
+            anim.speed = 1;
     }
 
     public void StartRotation(bool right)

@@ -124,7 +124,7 @@ public class RaySearch : MonoBehaviour
     {
         cornerCheck = false;
 
-        if (meshPoints != null)
+        if (meshPoints.Count > 0)
         {
             meshPoints.Clear();
             cornerPoints.Clear();

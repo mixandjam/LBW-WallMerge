@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Decal 1
+  m_Name: Decal_idle
   m_Shader: {fileID: 4800000, guid: 1d64af84bdc970c4fae0c1e06dd95b73, type: 3}
   m_ShaderKeywords: _ALBEDOCONTRIBUTION _COLORMAP _EMISSIVEMAP
   m_LightmapFlags: 4
@@ -30,7 +30,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseColorMap:
-        m_Texture: {fileID: 2800000, guid: f7ba27ec0c95e7342ac8e3a59b5993b3, type: 3}
+        m_Texture: {fileID: 2800000, guid: 46af6f51417e56a4fa52df80239ea293, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BentNormalMap:
@@ -54,7 +54,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissiveColorMap:
-        m_Texture: {fileID: 2800000, guid: 963d85c534ee4de419f2a70dd2e53cb7, type: 3}
+        m_Texture: {fileID: 2800000, guid: 94d54497dc6bd6547ad0db1204343516, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HeightMap:
@@ -163,8 +163,8 @@ Material:
     - _DstBlend: 0
     - _Emissive: 1
     - _EmissiveColorMode: 1
-    - _EmissiveExposureWeight: 0.254
-    - _EmissiveIntensity: 900
+    - _EmissiveExposureWeight: 0.2
+    - _EmissiveIntensity: 90
     - _EmissiveIntensityUnit: 0
     - _EnableBlendModePreserveSpecularLighting: 1
     - _EnableFogOnTransparent: 1
@@ -251,7 +251,7 @@ Material:
     - _DiffusionProfileAsset: {r: 0, g: 0, b: 0, a: 0}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
-    - _EmissiveColor: {r: 0, g: 0, b: 0, a: 900}
+    - _EmissiveColor: {r: 0, g: 0, b: 0, a: 90}
     - _EmissiveColorHDR: {r: 42.224255, g: 42.224255, b: 42.224255, a: 1}
     - _EmissiveColorLDR: {r: 0, g: 0, b: 0, a: 1}
     - _InvPrimScale: {r: 1, g: 1, b: 0, a: 0}

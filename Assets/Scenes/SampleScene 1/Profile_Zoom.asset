@@ -153,7 +153,7 @@ MonoBehaviour:
   m_AdvancedMode: 0
   intensity:
     m_OverrideState: 1
-    m_Value: -0.81
+    m_Value: -0.741
     min: -1
     max: 1
   xMultiplier:
@@ -171,6 +171,6 @@ MonoBehaviour:
     m_Value: {x: 0.5, y: 0.5}
   scale:
     m_OverrideState: 1
-    m_Value: 1.7
+    m_Value: 1.31
     min: 0.01
     max: 5
