@@ -24,6 +24,13 @@ public class WallMerge : MonoBehaviour
 
     [Header("Public References")]
     public ProjectorMovement decalMovement;
+    public Transform frameQuad;
+    private Renderer frameRenderer;
+
+    [Space]
+    [Header("Frame Settings")]
+    public Color frameLitColor;
+
 
     [Space]
 
@@ -45,6 +52,7 @@ public class WallMerge : MonoBehaviour
         playerController = GetComponent<CharacterController>();
         brain = Camera.main.GetComponent<CinemachineBrain>();
         playerZScale = transform.GetChild(0).localScale.z;
+        frameRenderer = frameQuad.GetComponent<Renderer>();
     }
 
     void Update()
@@ -101,11 +109,22 @@ public class WallMerge : MonoBehaviour
 
     public void Transition(bool state, Vector3 point, Vector3 normal)
     {
+
         Vector3 finalNormal = state ? -normal : normal;
         Vector3 finalPosition = state ? point - new Vector3(0, .9f, 0) : point;
         string animatorStatus = state ? "turn" : "normal";
         float scale = state ? .01f : playerZScale;
         float finalTransition = state ? .5f : .3f;
+
+        if (state == true)
+        {
+            frameQuad.position = transform.position + new Vector3(0, .85f, 0) - (transform.forward*.5f);
+            frameQuad.forward = -normal;
+            frameRenderer.material.SetColor("_UnlitColor", Color.clear);
+            frameRenderer.material.DOColor(frameLitColor, "_UnlitColor", 1f).SetDelay(.3f);
+            frameQuad.DOMove(finalPosition + new Vector3(0, .85f, 0) - (transform.forward * .05f), finalTransition).SetEase(Ease.InBack).SetDelay(.2f);
+        }
+
 
         transform.forward = finalNormal;
         playerAnimator.SetTrigger(animatorStatus);
@@ -142,6 +161,7 @@ public class WallMerge : MonoBehaviour
             s.AppendCallback(() => playerController.enabled = true);
         }
         s.AppendCallback(() => decalMovement.isActive = state);
+        s.Append(frameRenderer.material.DOColor(Color.clear, "_UnlitColor", 1));
 
         //Effects
         float dofDelay = state ? finalTransition + .3f : 0;
